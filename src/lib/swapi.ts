@@ -1,7 +1,5 @@
 // fetch er sjálfgefið hér; next sér um að importa
 
-import { characterFragment } from '../graphql/characterFragment';
-
 // Ekki þarf að geyma í env
 const baseUrl = 'https://swapi-graphql.netlify.app/.netlify/functions/index';
 
@@ -40,16 +38,27 @@ export async function fetchSwapi<T>(
 
 // Gott að hafa sameiginlegt fall hér til að sækja fyrstu síðu á /pages/character/index.tsx og
 // næstu á /pages/api/character.ts
-// TODO EKKI any hér!
-export async function fetchCharacters(after = ''): Promise<any> {
+export async function fetchCharacters<T>(after = ''): Promise<T> {
   // Höldum query hér til að geta séð hvernig við erum að sækja
   // Nákvæmlega hvað við sækjum per character er skilgreint í fragmenti
   const query = `
-    query($after: String = "") {
-      # TODO query
+  query ($after: String = ""){
+    allPeople(first:10 after: $after) {
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
+      }
+      people {
+        id
+        name
+      }
     }
-    ${characterFragment}
-  `;
+  }
 
-  return fetchSwapi<any>(query, { after });
+  `;
+  //
+
+  return fetchSwapi<T>(query, { after });
 }
